@@ -1,22 +1,12 @@
 """
-Authors - Team C:
-- Isobel Rae Impas
-- Jan P. Thoma
-- Camila Vasquez
-- Santiago Alfonso Galeano
-- Miguel Frutos
-
-Based on the code provided by Raul Marin & Hupperich-Manuel
-https://github.com/raulmarinperez/bsdprof/tree/main/big_data/stream_processing/templates/twitter
-
-Description: Scan the latest twitter feeds originating from a particular country, using Twitter’s Streaming API. The program creates a file which stores raw twitter streams with the name stream_<query given as argument>.json at the data path mentioned in the config.py file for testing purposes.
+Description: Scan the latest twitter feeds originating from a particular country, using Twitter’s Streaming API. The program creates a json file which stores raw twitter streams for an specific bounding box.
 
 Required Packages: tweepy, argparse, time, string, json, prettytable
 
-Usage: python3 twitter_producer.py -q 'hashtag' -c 'country'
+Usage: python3 twitter_producer.py credentials.ini -b localhost:9092 -t tweets
 
 Note: Fill up the variable in credentials.ini which contains data path and twitter app credentials.
-
+Note: Fill up the LOCATION variable for changing the country bounding box. By default for this project would be "Ukraine".
 
 """
 import configparser, argparse, logging, socket, tweepy, socket, sys
@@ -27,7 +17,9 @@ from tweepy.streaming import Stream
 # Auxiliary classes
 #
 class TwitterStreamListener(tweepy.Stream):
-
+    """tweepy.Stream is a class provided by tweepy used to access
+    the Twitter Streaming API to collect tweets in real-time.
+    """
     _kafka_producer = None
     _topic = None
     
@@ -53,47 +45,23 @@ class TwitterStreamListener(tweepy.Stream):
         #logging.error(status)
         print("Error received in kafka producer " + repr(status))
         return sys.exit(-1) ## Don't kill the stream. tells the program to quit,it stops from continuoing the execution
-
-    def get_parser():
-        """Get parser for command line arguments."""
-        logging.basicConfig(level=logging.INFO) #Logging is a means of tracking events that happen when some software runs
-        parser = argparse.ArgumentParser(description="Scanning Twitter Stream")
-        parser.add_argument("credentials_file", 
-                            help="path to the file with info to access the service")
-        #parser.add_argument("filters", 
-         #                   help="provide the filters matching the tweets you want to get")
-        parser.add_argument("-c",
-                            "--country",
-                            dest="country",
-                            help="Country/Location",
-                            default='India')
-
-        parser.add_argument("-b", "--broker",
-                            help="server:port of the Kafka broker where messages will be published")
-        parser.add_argument("-t", "--topic",
-                            help="topic where messages will be published")  
-        return parser    
+ 
    
 # Body of the scripts       
 #
-    
 if __name__ == '__main__':
     #Parse the argument given in the commandline
     logging.basicConfig(level=logging.INFO) #Logging is a means of tracking events that happen when some software runs
     parser = argparse.ArgumentParser(description="Scanning Twitter Stream")
     parser.add_argument("credentials_file", 
                          help="path to the file with info to access the service")
-        #parser.add_argument("filters", 
-         #                   help="provide the filters matching the tweets you want to get")
     parser.add_argument("-b", "--broker",
                             help="server:port of the Kafka broker where messages will be published")
     parser.add_argument("-t", "--topic",
                             help="topic where messages will be published")  
-      #return parser   
-    #parser = get_parser()
     args = parser.parse_args()   
 
-  # Read credentials to connect to the Twitter Stream
+  # Read credentials.ini to connect to the Twitter Stream
   #
     credentials = configparser.ConfigParser()
     credentials.read(args.credentials_file)
@@ -103,19 +71,6 @@ if __name__ == '__main__':
     access_token = credentials['DEFAULT']['access_token']
     access_secret = credentials['DEFAULT']['access_secret']
     
-  # Other alternative would be using OAuthHandler instead of the credentials.ini file  
-    #from tweepy import OAuthHandler
-
-    #make sure to keep your access keys secret
-    #access_token = "(your own)"             
-    #access_token_secret =  "(your own)"
-    #api_key =  "(your own)"
-    #api_secret =  "(your own)"
-
-    #auth = OAuthHandler(api_key, api_secret)
-    #auth.set_access_token(access_token, access_token_secret)    
-
-
   # Twitter connection and Kafka producer initialization
   #  
     twitter_conn = TwitterStreamListener(API_key, API_secret,
@@ -124,12 +79,11 @@ if __name__ == '__main__':
   # Initialize the Kafka producer if broker and topic was specified
 if args.broker != None and args.topic != None:
     twitter_conn.connect_to_kafka(args.broker, args.topic)
-    # Start the filtering. Filter the Twitter stream based on the country passed as argument
-    LOCATION = (22.0856083513, 44.3614785833, 40.0807890155, 52.3350745713)
-    twitter_conn.filter(locations=LOCATION)
-    twitter_conn.sample()
-
-else:
+    # Start the filtering. Bounding Boxes by country : https://gist.github.com/graydon/11198540
+    # LOCATIONS are the longitude, latitude coordinate corners for a box that restricts the 
+    # geographic area from which you will stream tweets. The first two define the southwest
+    # corner of the box and the second two define the northeast corner of the box. 
+    LOCATION = (22.0856083513, 44.3614785833, 40.0807890155, 52.3350745713) #Ukraine
     twitter_conn.filter(locations=LOCATION)
     twitter_conn.sample()
     
