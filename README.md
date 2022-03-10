@@ -25,9 +25,19 @@ IE Students of the MSc Business Analytics & Big Data. Team Power Rangers:
 
 # Ukraine_tweets
 ### 1- Select the Data Source: Twitter API
-[Tweepy](http://www.tweepy.org/)  is a python wrapper for the Twitter API that allowed us to easily collect tweets in real-time.
+Setting up Twitter. You need to create a "Twitter App". Follow the next steps:
+- Visit [Projects & Apps](https://developer.twitter.com/en/portal/projects-and-apps) section in the Developer Portal
+- Sign into your account. (if you dont have one you should create it).
+- Click the “Create an app” button.
+- Fill-in the form (at least required fields).
+- Grab the details to setup the ingestion script later on.
+- Once you’re in, click the “Create an app” button to start the process.
+- Fill-in required fields.
+- If all goes well, your Twitter App should be created and the API Key, API Secret Key will show up.
+- The Access Token and Access Token Secret will be also needed.
 
 ### 2- Ingestion - Producer (Python app)
+[Tweepy](http://www.tweepy.org/)  is a python wrapper for the Twitter API that allowed us to easily collect tweets in real-time.
 
 ```python
 
@@ -54,3 +64,6 @@ IE Students of the MSc Business Analytics & Big Data. Team Power Rangers:
 # Bibliography
 - Project by Raul Marin & Hupperich-Manuel https://github.com/raulmarinperez/bsdprof/tree/main/big_data/stream_processing/templates/twitter
 - Project by Shawn Terryah https://github.com/shawn-terryah/Twitter_Geolocation
+- Project by TuringTester https://github.com/TuringTester/Twitter-Data-Mining-Python
+- Bounding Boxes by country https://gist.github.com/graydon/11198540
+- 
