@@ -55,7 +55,6 @@ python3 twitter_producer.py credentials.ini -b localhost:9092 -t tweets
 FILE *(twitter_producer.py)* :
 ```python
 """
-"""
 Description: Scan the latest twitter feeds originating from a particular country, using Twitter’s Streaming API. The program creates a json file which stores raw twitter streams for an specific bounding box.
 
 Required Packages: tweepy, argparse, time, string, json, prettytable
