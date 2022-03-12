@@ -15,7 +15,7 @@ Our dearly Stream Processing & Real-Time Analytics professor Raul Marín has pro
   4- **Processing**: Consumer - Spark Streaming.<br>
   5- **Serving**: Relational DB - MariaDB.<br>
   6- **Visualization**: Superset.<br>
-![pipeline](Imgs/pipeline.png)
+![pipeline](Imgs/pipeline_snapshot.png)
 ### Who are we?
 IE Students of the MSc Business Analytics & Big Data. Team Power Rangers:
   - Isobel Rae Impas
