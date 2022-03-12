@@ -2,6 +2,7 @@
 
 ![header](Imgs/no_war_header.jpeg)
 
+
 # Project Motivation
 
 Thursday, February 24, 2022 Russian army invades Ukraine and marks the beginning of a war that threatens Western countries, accompanied by a humanitarian refugee crisis. The purpose of this project is to obtain the Geolocation of Ukrainian Twitter Users. One of the limitations to using Twitter is that only about 1% of tweets are geotagged with the tweet's location, which can make much of this work very difficult.
@@ -146,8 +147,9 @@ if args.broker != None and args.topic != None:
 ```
 Twitter Development Platform opens the possibility to filter with some standard parameters the information we are ingesting. Through the [".filter()"](https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/guides/basic-stream-parameters) method (at the end of the script) we are filtering the tweets posted in a bounding box specific for the Ukraine region. As you can see... we are taking a snapshot that are including regions of other countries... therefore, in the processing (consumer) layer we will have to remove those tweets.
 
-![bounding_box](Imgs/ukraine_bounding_box.png)
 
+<p align="center">
+<img src="Imgs/ukraine_bounding_box.png" alt="drawing" width="600"/>
 
 ### 3- Stream Storage: Broker (Kafka)
 
