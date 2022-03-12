@@ -376,6 +376,8 @@ if __name__ == '__main__':
 ### 5- Serving: Relational DB (MariaDB)
 
 
+
+
 ### 6- DataViz: Superset
 
 # Insights
@@ -383,7 +385,8 @@ if __name__ == '__main__':
 
 # Final Notes
 
-
+We find important to mention that for the Ukraine_tweets project, the environment that we are utilizing is a Virtual Machine (VM) that was created for academic purpose called ["Open Source Big Data Educational Toolkit (OSBDET)"](https://github.com/raulmarinperez/osbdet). To scale this exercise we can run the project on an Amazon Web Services EC2 instance with 200 GiB of storage using tmux, in two weeks we will collect millions of tweets to find insights close to a sentiment analysis or a precise geo-localitation stream of the Ukrainian population.
+       
 # Bibliography
 - Project by Raul Marin & Hupperich-Manuel https://github.com/raulmarinperez/bsdprof/tree/main/big_data/stream_processing/templates/twitter
 - Project by Shawn Terryah https://github.com/shawn-terryah/Twitter_Geolocation
