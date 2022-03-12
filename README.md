@@ -144,13 +144,18 @@ if args.broker != None and args.topic != None:
     twitter_conn.sample()
 
 ```
+Twitter Development Platform opens the possibility to filter with some standard parameters the information we are ingesting. Through the [".filter()"](https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/guides/basic-stream-parameters) method (at the end of the script) we are filtering the tweets posted in a bounding box specific for the Ukraine region. As you can see... we are taking a snapshot that are including regions of other countries... therefore, in the processing (consumer) layer we will have to remove those tweets.
+
+![bounding_box](Imgs/ukraine_bounding_box.png)
+
+
 ### 3- Stream Storage: Broker (Kafka)
 
 
 ### 4- Processing: Consumer (Spark Streaming)
 ```python
 """
-Description: Receiving the tweets coming fro Kafka Broker. Processing the tweets posted in Ukraine. The tweets will be uploaded in a MariaDB database.
+Description: Receiving the tweets coming from Kafka Broker. Processing the tweets posted in Ukraine. The tweets will be uploaded in a MariaDB database.
 
 Required Packages: configparser, argparse, findspark, os, SparkContext, SparkSession, split, col, window, concat, lit, TimestampType
 
