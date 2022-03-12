@@ -19,6 +19,7 @@ Our dearly Stream Processing & Real-Time Analytics professor Raul Marín has pro
 IE Students of the MSc Business Analytics & Big Data. Team Power Rangers:
   - Isobel Rae Impas
   - Jan P. Thoma
+  - Nikolas Artadi
   - Camila Vasquez
   - Santiago Alfonso Galeano
   - Miguel Frutos
@@ -53,6 +54,7 @@ python3 twitter_producer.py credentials.ini -b localhost:9092 -t tweets
 ```
 FILE *(twitter_producer.py)* :
 ```python
+"""
 """
 Description: Scan the latest twitter feeds originating from a particular country, using Twitter’s Streaming API. The program creates a json file which stores raw twitter streams for an specific bounding box.
 
@@ -142,32 +144,102 @@ if args.broker != None and args.topic != None:
     twitter_conn.filter(locations=LOCATION)
     twitter_conn.sample()
 
-
 ```
 ### 3- Stream Storage: Broker (Kafka)
 
 
 ### 4- Processing: Consumer (Spark Streaming)
 ```python
-# Get the configurations for our use case
+"""
+Description: Receiving the tweets coming fro Kafka Broker. Processing the tweets posted in Ukraine. The tweets will be uploaded in a MariaDB database.
+
+Required Packages: configparser, argparse, findspark, os, SparkContext, SparkSession, split, col, window, concat, lit, TimestampType
+
+Usage: python3 twitter_consumer.py twitter_consumer_config.ini
+
+"""
+
+#To read conf. file
+import configparser
+#To read arg. from command line
+import argparse
+
+#Search Spark Installation. This step is required just because we are working in the course environment.
+import findspark
+findspark.init()
+
+#Sending to the Spark Cluster the main program. It'll execute the script and during the execution the code will be optimized by Catalist and then, the code will be executed in the executors and coordinated by the driver process.
+import os
+os.environ['PYSPARK_SUBMIT_ARGS'] = '--packages "org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.3" pyspark-shell'
+
+#To initiate our Spark Session
+from pyspark.context import SparkContext
+from pyspark.sql import SparkSession
+
+from pyspark.sql.functions import split, col, window, concat, lit
+from pyspark.sql.types import TimestampType
+
+#This function is providing the schema for each event or batch and connecting it to an external MariaDB database.
+def foreach_batch_function(df, epoch_id, config):
+    print ("Batch %d received" % epoch_id)
+    
+    url = config['DEFAULT']['rdbms_url']
+    table = config['DEFAULT']['rdbms_table']
+    mode = "append"
+    props = {"user":config['DEFAULT']['rdbms_user'],
+             "password":config['DEFAULT']['rdbms_password']} 
+    
+    df.select("event_time", "screen_name", "text", "hashtags", 
+              "coordinates", "country", "country_code","location") \
+      .write \
+      .jdbc(url,table,mode,props) 
+    #data source
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("configuration_file", 
+                        help="configuration file with all the information to run the job")
+    args = parser.parse_args()
+    
+    print ("The streaming_consumer_template is about to start...")
+    
+    # Read the configuration file to setup the Spark Streaming Application (job)
+    #
+    print ("   - Reading the configuration of my Spark Streaming Application.")
+    config = configparser.ConfigParser()
+    config.read(args.configuration_file)
+    
+    # Create a SparkSession to run our Spark Streaming Application (job)
+    #
+    print ("   - Creating the Spark Session that will allow me to interact with Spark.")
+    sc = SparkSession.builder\
+        .master('local')\
+        .appName('groupassignment')\
+        .getOrCreate()
+
+    # Logic of our Spark Streaming Application (job)
+    #
+
+    # Get the configurations for our use case
     kafka_input_topic = config['DEFAULT']['kafka_input_topic']
     kafka_group_id = config['DEFAULT']['kafka_group_id']
     
     # Build the DataFrame from the source
     
-    print ("   - Building the rawEventsDF DataFrame with data coming from Kafka.\
-                Have a look at the schema you get by default when you create a DataFrame on top of a Kafka topic.\
-                The value field is the one containing the data from the ingestion layer, the Twitter producer in our case.\
-                Bear in mind thataAs we're simplifying things, we're not relying on schemas and we're sending sequence of\
-                bytes to Kafka topics.\
-                Later in the notebook, we're going to convert that sequence of bytes in a proper JSON document \
-                representing every tweet as it was received.")
+    #Building the rawEventsDF DataFrame with data coming from Kafka.\
+    #Have a look at the schema you get by default when you create a DataFrame on top of a Kafka topic.\
+    #The value field is the one containing the data from the ingestion layer, the Twitter producer in our case.\
+    #Bear in mind thataAs we're simplifying things, we're not relying on schemas and we're sending sequence of\
+    #bytes to Kafka topics.\
+    #Later in the notebook, we're going to convert that sequence of bytes in a proper JSON document \
+    #representing every tweet as it was received.")
     rawTweetsDF = sc.readStream \
                        .format("kafka") \
                        .option("kafka.bootstrap.servers", "localhost:9092") \
                        .option("subscribe", "tweets") \
                        .option("startingOffsets", "latest") \
-                       .load()
+                       .load()\
  
     #Map the sequence of bytes to a Dataframe.\
     #We're going to apply the following logic to the events we get from the topic:\
@@ -175,9 +247,6 @@ if args.broker != None and args.topic != None:
     #2- Cast the default data type of the field value (byte) to the String data type.\
     #3- Convert the String into a proper JSON document by using the from_json function.\
     #4- Flatten the JSON file and display event time, user name, text and the id.\
-    #5- Display the results in the console.\
-    #Watch the schema we get now, it looks like any other DataFrame we've seen up until now\
-    #.. this is a real unified processing framework.")
 
              
     ## 1- Define the schema that matches the raw sequence of bytes we get from the topic.
@@ -253,32 +322,19 @@ if args.broker != None and args.topic != None:
     from pyspark.sql.functions import from_json, col         
            
 
-  # print ("   - Polishing raw events and building a DataFrame ready to apply the logic.")
-    #eoEventsDF = rawEventsDF.select(split("value",'\|').alias("fields")) \
-     #                       .withColumn("timestamp_str",col("fields").getItem(0)) \
-      #                      .withColumn("event_source",col("fields").getItem(1) \
-       #                     .withColumn("truck_id",col("fields").getItem(2)) \
-        #                    .withColumn("driver_id",col("fields").getItem(3)) \
-         #                   .withColumn("driver_name",col("fields").getItem(4)) \
-          #                  .withColumn("event_type", col("fields").getItem(7)) \
-           #                 .where(col("event_source")=="truck_geo_event") \
-            #                .withColumn("event_time",col("timestamp_str").cast(TimestampType())) \
-             #               .select("event_time", "event_type", "driver_id", "driver_name", "truck_id")
-
-    print("   - Polishing raw events and building a DataFrame ready to apply the logic.")
-    tweetsDF = rawTweetsDF.select(split("value",'\,').alias("fields")) \
-                            .withColumn("created_at",col("fields").getItem(0)) \
-                            .withColumn("user_screen_name",col("fields").getItem(15)) \
-                            .withColumn("text",col("fields").getItem(3)) \
-                            .withColumn("entities.hashtags",col("fields").getItem(55))\
-                            .withColumn("coordinates.coordinates",col("fields").getItem(36))\
-                            .withColumn("place.country", col("fields").getItem(40))\
-                            .withColumn("place.country_code", col("fields").getItem(41))\
-                            .withColumn("user.location", col("fields").getItem(18))\
-                            .where(col("data.place.country_code")=="UA") \
-                            .withColum("event_time",col("created_at").cast(TimestampType()))\
-                            .withColumn("user_profile_location",col("user_location"))\
-                            .select("event_time", "user_screen_name", "text", "entities.hashtags", "coordinates.coordinates", "place.country" , "place.country_code", "user_profile_location")
+ #   print("   - Polishing raw events and building a DataFrame ready to apply the logic.")
+ #   tweetsDF = rawTweetsDF.select(split("value",'\,').alias("fields")) \
+ #                           .withColumn("created_at",col("fields").getItem(0)) \
+ #                           .withColumn("screen_name",col("fields").getItem(15)) \
+ #                           .withColumn("text",col("fields").getItem(3)) \
+ #                           .withColumn("hashtags",col("fields").getItem(55))\
+ #                           .withColumn("coordinates",col("fields").getItem(36))\
+ #                           .withColumn("location", col("fields").getItem(18))\
+ #                           .withColumn("country", col("fields").getItem(40))\
+ #                           .withColumn("country_code", col("fields").getItem(41))\
+ #                           .where(col("country_code")=="UA") \
+ #                           .withColumn("event_time",col("created_at").cast(TimestampType()))\
+ #                           .select("event_time", "screen_name", "text", "hashtags","coordinates", "country" , "country_code", "location")
            
              
    
@@ -286,29 +342,29 @@ if args.broker != None and args.topic != None:
     # 3. Convert the String into a proper JSON document by using the from_json function.
     # 4. Flatten the JSON file and display event time, user name, text and the id.
 
-  #  tweetsDF = rawTweetsDF.selectExpr("CAST(value AS STRING)") \
-   #                      .select(from_json(col("value"), tweet_schema).alias("data")) \
-    #                     .select(col("data.created_at").alias("event_time"), 
-     #                            col("data.user.screen_name"),
-      #                           col("data.text"),
-       #                          col("data.entities.hashtags"),
-        #                         col("data.coordinates.coordinates"),
-         #                        col("data.place.country"),
-          #                       col("data.place.country_code"),
-           #                      col("data.user.location").alias("User_Profile_Location"))\
-            #             .filter((col("data.place.country_code")=="UA"))
+    tweetsDF = rawTweetsDF.selectExpr("CAST(value AS STRING)") \
+                          .select(from_json(col("value"), tweet_schema).alias("data")) \
+                          .select(col("data.created_at").alias("event_time"), 
+                                col("data.user.screen_name").alias("screen_name"),
+                                col("data.text").alias("text"),
+                                col("data.entities.hashtags").alias("hashtags"),
+                                col("data.coordinates.coordinates").alias("coordinates"),
+                                col("data.place.country").alias("country"),
+                                col("data.place.country_code").alias("country_code"),
+                                col("data.user.location").alias("location"))\
+                          .filter((col("location")=="UA"))
+
     
     
-    # 3. Configure the sink to send the results of the processing and start the streaming query
+    # Configure the sink to send the results of the processing and start the streaming query
     print ("   - Configuring the foreach sink to handle batches by ourselves.")
     streamingQuery = tweetsDF.writeStream \
                                 .foreachBatch(lambda df,epochId:foreach_batch_function(df, epochId, config))\
                                 .start()
 
-        # 4. Await for the termination of the Streaming Query (otherwise the SparkSession will be closed)
+    # Await for the termination of the Streaming Query (otherwise the SparkSession will be closed)
     print ("The streaming query is running in the background (Ctrl+C to stop it)")
     streamingQuery.awaitTermination()
-
 ```
 
 ### 5- Serving: Relational DB (MariaDB)
