@@ -5,7 +5,7 @@
 
 # Project Motivation
 
-Thursday, February 24, 2022 Russian army invades Ukraine and marks the beginning of a war that threatens Western countries, accompanied by a humanitarian refugee crisis. The purpose of this project is to obtain the Geolocation of Ukrainian Twitter Users. One of the limitations to using Twitter is that only about 1% of tweets are geotagged with the tweet's location, which can make much of this work very difficult.
+Thursday, February 24, 2022 Russian army invades Ukraine and marks the beginning of a war that threatens Western countries, accompanied by a humanitarian refugee crisis. The purpose of this project is to obtain information from Ukrainian tweets for future analysis.. One of the limitations to using Twitter is that only about 1% of tweets are geotagged with the tweet's location, which can make much of this work very difficult.
 
 ### Assignment Description
 Our dearly Stream Processing & Real-Time Analytics professor Raul Marín has proposed us a challenge. To deploy an end-to-end real-time solution following the next stages throughout the pipeline:<br>
@@ -30,7 +30,7 @@ IE Students of the MSc Business Analytics & Big Data. Team Power Rangers:
 Setting up Twitter. You need to create a "Twitter App". Follow the next steps:
 - Visit [Projects & Apps](https://developer.twitter.com/en/portal/projects-and-apps) section in the Developer Portal
 - Sign into your account. (if you dont have one you should create it).
-- Click the “Create an app” button.
+- Click the “Sign up for a developer account” button.
 - Fill-in the form (at least required fields).
 - Grab the details to setup the ingestion script later on.
 - Once you’re in, click the “Create an app” button to start the process.
@@ -152,6 +152,9 @@ Twitter Development Platform opens the possibility to filter with some standard 
 <img src="Imgs/ukraine_bounding_box.png" alt="drawing" width="600"/>
 
 ### 3- Stream Storage: Broker (Kafka)
+The Kafka broker receives the tweets from the Kafka Producer and stores them on disk keyed by unique offset. It will allow the Spark Consumer to fetch the tweets by topic, in this case the topic is called “tweets”, which will be divided in partitions and offsets.
+
+Kafka brokers can create a Kafka cluster by sharing information between each other directly or indirectly. The Kafka cluster has exactly one broker that acts as the Controller.
 
 
 ### 4- Processing: Consumer (Spark Streaming)
