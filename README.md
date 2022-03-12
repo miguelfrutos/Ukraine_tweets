@@ -29,12 +29,10 @@ IE Students of the MSc Business Analytics & Big Data. Team Power Rangers:
 ### 1- Select the Data Source: Twitter API
 Setting up Twitter. You need to create a "Twitter App". Follow the next steps:
 - Visit [Projects & Apps](https://developer.twitter.com/en/portal/projects-and-apps) section in the Developer Portal
-- Sign into your account. (if you dont have one you should create it).
-- Click the “Sign up for a developer account” button.
-- Fill-in the form (at least required fields).
+- Sign into your account. (if you don't have one you should create it).
+- Click the “Create an app” button.
+- Fill-in the form (at least the required fields).
 - Grab the details to setup the ingestion script later on.
-- Once you’re in, click the “Create an app” button to start the process.
-- Fill-in required fields.
 - If all goes well, your Twitter App should be created and the API Key, API Secret Key will show up.
 - The Access Token and Access Token Secret will be also needed.
 
