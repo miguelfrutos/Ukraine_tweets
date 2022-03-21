@@ -154,7 +154,18 @@ The Kafka broker receives the tweets from the Kafka Producer and stores them on 
 
 Kafka brokers can create a Kafka cluster by sharing information between each other directly or indirectly. The Kafka cluster has exactly one broker that acts as the Controller.
 
+As a trial, we will display/print the raw json files that our consumer is receiving from kafka.
 
+```python
+python3 kafka_consumer.py tweets IE 100 
+```
+  
+<p align="center">
+<img src="Imgs/black_screen.png" alt="drawing" width="600"/>
+
+Nice! We can confirm that our tweets are following the correct flow. Its time to process all the information that we are compiling to structure it and make it work for our use-case.
+  
+  
 ### 4- Processing: Consumer (Spark Streaming)
 ```python
 """
